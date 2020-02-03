@@ -2074,9 +2074,9 @@ class FORM(DIV):
     """
     Examples:
 
-    >>> from validators import IS_NOT_EMPTY
-    >>> form=FORM(INPUT(_name="test", requires=IS_NOT_EMPTY()))
-    >>> form.xml()
+    from validators import IS_NOT_EMPTY
+    form=FORM(INPUT(_name="test", requires=IS_NOT_EMPTY()))
+    form.xml()
     '<form action=\"#\" enctype=\"multipart/form-data\" method=\"post\"><input name=\"test\" type=\"text\" /></form>'
 
 
