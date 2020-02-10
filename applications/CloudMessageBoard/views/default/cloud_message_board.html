@@ -1,0 +1,109 @@
+{{extend 'layout.html'}}
+<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
+
+<h1>Message submit function section</h1>
+<form action="/CloudMessageBoard/default/cloud_message_board/" method="post">
+    Sender &nbsp&nbsp&nbsp<input type="text" name="sender"/> <br>
+    Receiver &nbsp<input type="text" name="receiver"/> <br>
+    Content &nbsp&nbsp<input type="text" name="msg"/> <br>
+    <input type="submit" value="Submit message">
+</form>
+<h1>Get Messages Information</h1>
+Sender &nbsp &nbsp <input type="text" name="getSender"/> <br>
+Receiver &nbsp <input type="text" name="getReceiver"/> <br>
+<button onclick="displayUnreadMsg()">Unread Messages</button>
+<button onclick="displayAllMsg()">All Messages</button>
+<button onclick="clearMsg()">Clear</button>
+<table id="example" class="display" width="100%"></table>
+
+<script>
+    function update_data(url) {
+        $.ajax({
+            url: url,
+            type: 'GET', //GET
+            async: true,    //或false,是否异步
+            timeout: 50000,    //超时时间
+            dataType: 'json',    //返回的数据格式：json/xml/html/script/jsonp/text
+            success: function (data, textStatus, jqXHR) {
+                console.log(data);
+                // var records = JSON.parse(data)['records'];
+                // console.log(records);
+                $('#example').DataTable().destroy();
+                $('#example').DataTable({
+                    data: data['records'],
+                    "searching": false,
+                    "pageLength": 20,
+                    columns: [
+                        {title: 'ID', data: "id"},
+                        {title: 'Sender', data: "sender"},
+                        {title: 'Receiver', data: "receiver"},
+                        {title: 'Content', data: "message_content"},
+                        {title: 'has_read', data: "has_read"},
+                        {title: 'sent_time', data: "sent_time"},
+                    ]
+                });
+
+                $.ajax({
+                    url: url,
+                    type: 'POST', //GET
+                    async: true,    //或false,是否异步
+                    timeout: 50000,    //超时时间
+                    dataType: 'json',    //返回的数据格式：json/xml/html/script/jsonp/text
+                    success: function (data, textStatus, jqXHR) {
+                        console.log("has_read has been updated in the backend")
+                    }
+                })
+            }
+        })
+    }
+
+    function displayAllMsg() {
+        let base_url = '/CloudMessageBoard/default/api?'
+        let receiver = $("input[name='getReceiver']").val();
+        if (receiver !== undefined) {
+            base_url += `receiver=${receiver}&`
+        }
+
+        let sender = $("input[name='getSender']").val();
+        if (sender !== undefined) {
+            base_url += `sender=${sender}&`
+        }
+        update_data(base_url)
+    }
+
+    function displayUnreadMsg() {
+        let base_url = '/CloudMessageBoard/default/api?'
+        let receiver = $("input[name='getReceiver']").val();
+        if (receiver !== undefined) {
+            base_url += `receiver=${receiver}&`
+        }
+
+        let sender = $("input[name='getSender']").val();
+        if (sender !== undefined) {
+            base_url += `sender=${sender}&`
+        }
+        base_url += "has_read=F&"
+        update_data(base_url)
+    }
+
+    function clearMsg() {
+        $('#example').DataTable().clear().draw()
+        console.log("table destroyed cleared.");
+    }
+
+    $(document).ready(function () {
+        $('#example').DataTable({
+            data: {},
+            "searching": false,
+            columns: [
+                {title: 'ID', data: "id"},
+                {title: 'Sender', data: "sender"},
+                {title: 'Receiver', data: "receiver"},
+                {title: 'Content', data: "message_content"},
+                {title: 'has_read', data: "has_read"},
+                {title: 'sent_time', data: "sent_time"},
+            ]
+        });
+    });
+</script>
